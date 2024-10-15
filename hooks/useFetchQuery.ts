@@ -1,7 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
 
-const endpoint= "../database/fruit_du_demon.json"
-
 export function useFetchQuery(url: string) {
     return useQuery({
         queryKey: [url],

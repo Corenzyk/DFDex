@@ -23,8 +23,8 @@ export default function Index() {
                     numColumns={3}
                     contentContainerStyle={[styles.gridGap, styles.list]}
                     columnWrapperStyle={styles.gridGap}
-                    renderItem={({item}) => <FDDCard id={item._id} nameFr={item.name} image={item.image} style={{flex: 1/3}}/>}
-                    keyExtractor={(item) => item._id.toString()}/>
+                    renderItem={({item}) => <FDDCard id={item.id} nameFr={item.name} image={item.image} style={{flex: 1/3}}/>}
+                    keyExtractor={(item) => item.id.toString()}/>
             </Card>
         </SafeAreaView>
     );
