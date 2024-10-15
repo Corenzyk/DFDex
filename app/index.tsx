@@ -4,30 +4,40 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedText} from "@/components/ThemedText";
 import {useThemeColors} from "@/hooks/useThemeColors";
 import {Card} from "@/components/Card";
-import {FDDCard} from "@/components/fdd/FDDCard";
-import {useFetchQuery} from "@/hooks/useFetchQuery";
+import {PokemonCard} from "@/components/pokemon/PokemonCard";
+import {useFetchQuery, useInfiniteFetchQuery} from "@/hooks/useFetchQuery";
+import {getPokemonId} from "@/functions/pokemon";
+import {SearchBar} from "@/components/SearchBar";
+import {useState} from "react";
+import {Row} from "@/components/Row";
 
 export default function Index() {
       const colors = useThemeColors()
-      const {data, isFetching} = useFetchQuery('https://raw.githubusercontent.com/Corenzyk/FDDex_Database/refs/heads/main/fruit_du_demon.json')
-      const fdd = data?.results ?? []
+      const {data, isFetching, fetchNextPage} = useInfiniteFetchQuery('/pokemon?limit=21')
+      const pokemons = data?.pages.flatMap(page => page.results) ?? []
+      const [search,setSearch] = useState('')
+      const filteredPokemons = search ? pokemons.filter(p => p.name.includes(search.toLowerCase()) || getPokemonId(p.url).toString() == search) : pokemons
     return (
         <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
-            <View style={styles.header}>
-                <Image style={styles.tinyLogo} source={require("@/assets/images/coffre.png")}/>
-                <ThemedText variant="headline" color="grayWhite">FDDex</ThemedText>
-            </View>
+            <Row style={styles.header} gap={16}>
+                <Image style={styles.tinyLogo} source={require("@/assets/images/pokeball.png")}/>
+                <ThemedText variant="headline" color="grayWhite">Pok√©dex</ThemedText>
+            </Row>
+            <Row>
+                <SearchBar value={search} onChange={setSearch}/>
+            </Row>
             <Card style={styles.body}>
                 <FlatList
-                    data={fdd}
+                    data={filteredPokemons}
                     numColumns={3}
                     contentContainerStyle={[styles.gridGap, styles.list]}
                     columnWrapperStyle={styles.gridGap}
                     ListFooterComponent={
                         isFetching ? <ActivityIndicator color={colors.tint}/> : null
                     }
-                    renderItem={({item}) => <FDDCard id={item._id} nameFr={item.name} image={item.image} style={{flex: 1/3}}/>}
-                    keyExtractor={(item) => item._id.toString()}/>
+                    onEndReached={search ? undefined : () => fetchNextPage()}
+                    renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}}/>}
+                    keyExtractor={(item) => item.url}/>
             </Card>
         </SafeAreaView>
     );
@@ -40,17 +50,16 @@ const styles = StyleSheet.create({ // StyleSheet.create propose de l'auto-compl√
         padding: 4,
     },
     tinyLogo:{
-        width:50,
-        height:50
+        width:30,
+        height:30
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-        padding: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
     },
     body: {
         flex: 1,
+        marginTop: 24
     },
     gridGap:{
         gap: 8,
