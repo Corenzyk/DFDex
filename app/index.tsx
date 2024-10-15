@@ -1,4 +1,4 @@
-import {FlatList, Image, StyleSheet, Text, View} from "react-native";
+import {ActivityIndicator, FlatList, Image, StyleSheet, Text, View} from "react-native";
 import {Link} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedText} from "@/components/ThemedText";
@@ -9,7 +9,7 @@ import {useFetchQuery} from "@/hooks/useFetchQuery";
 
 export default function Index() {
       const colors = useThemeColors()
-      const {data} = useFetchQuery('https://raw.githubusercontent.com/Corenzyk/FDDex_Database/refs/heads/main/fruit_du_demon.json')
+      const {data, isFetching} = useFetchQuery('https://raw.githubusercontent.com/Corenzyk/FDDex_Database/refs/heads/main/fruit_du_demon.json')
       const fdd = data?.results ?? []
     return (
         <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
@@ -23,8 +23,11 @@ export default function Index() {
                     numColumns={3}
                     contentContainerStyle={[styles.gridGap, styles.list]}
                     columnWrapperStyle={styles.gridGap}
-                    renderItem={({item}) => <FDDCard id={item.id} nameFr={item.name} image={item.image} style={{flex: 1/3}}/>}
-                    keyExtractor={(item) => item.id.toString()}/>
+                    ListFooterComponent={
+                        isFetching ? <ActivityIndicator color={colors.tint}/> : null
+                    }
+                    renderItem={({item}) => <FDDCard id={item._id} nameFr={item.name} image={item.image} style={{flex: 1/3}}/>}
+                    keyExtractor={(item) => item._id.toString()}/>
             </Card>
         </SafeAreaView>
     );
